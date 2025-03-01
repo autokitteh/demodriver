@@ -77,3 +77,8 @@ endif
 .PHONY: test
 test:
 	$(GOTEST) -race ./...
+
+# sqlc.dev | brew install sqlc
+.PHONY: sqlc
+sqlc:
+	sqlc generate -f sqlc/sqlc.yaml

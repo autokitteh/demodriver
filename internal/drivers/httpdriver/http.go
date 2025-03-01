@@ -44,7 +44,7 @@ func (d *httpDriver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	d.l.Info("got request", "request", data)
 
-	if err := d.drive("http", data); err != nil {
+	if err := d.drive(r.Context(), "http", data); err != nil {
 		http.Error(w, fmt.Sprintf("error: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}

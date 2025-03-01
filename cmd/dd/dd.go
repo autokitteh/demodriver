@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 
-	"go.autokitteh.dev/demodriver/internal/ddsvc"
+	"go.autokitteh.dev/demodriver/internal/ddapp"
 )
 
 const appName = "dd"
@@ -45,7 +45,7 @@ var cmd = cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ddsvc.New(slog.Default(), appName).Run()
+		ddapp.New(slog.Default(), appName).Run()
 		return nil
 	},
 }

@@ -1,0 +1,4 @@
+http:
+  src: http
+  qname: q
+  wtype: w0

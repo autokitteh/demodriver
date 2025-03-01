@@ -15,11 +15,11 @@ type Config struct {
 }
 
 func newConfig(prefix string) *Config {
-	return &Config{Koanf: koanf.New("."), prefix: strings.ToUpper(prefix) + "_"}
+	return &Config{Koanf: koanf.New("."), prefix: strings.ToUpper(prefix)}
 }
 
 func (c *Config) load(path string, dst any) error {
-	prefix := strings.ToUpper(fmt.Sprintf("%s_%s", c.prefix, path))
+	prefix := strings.ToUpper(fmt.Sprintf("%s_", c.prefix))
 
 	if err := c.Koanf.Load(
 		env.Provider(
@@ -28,7 +28,7 @@ func (c *Config) load(path string, dst any) error {
 			func(s string) string {
 				return strings.Replace(
 					strings.ToLower(strings.TrimPrefix(s, prefix)),
-					"__",
+					"_",
 					".",
 					-1,
 				)
@@ -56,5 +56,5 @@ func provideConfig[T any](name string, fs ...func(*T) error) fx.Option {
 		}
 
 		return t, nil
-	})
+	}, fx.Private)
 }

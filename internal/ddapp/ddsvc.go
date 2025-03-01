@@ -1,4 +1,4 @@
-package ddsvc
+package ddapp
 
 import (
 	"fmt"
@@ -8,8 +8,12 @@ import (
 	"go.uber.org/fx"
 
 	"go.autokitteh.dev/demodriver/internal/app"
+	"go.autokitteh.dev/demodriver/internal/db"
 	"go.autokitteh.dev/demodriver/internal/driver"
-	"go.autokitteh.dev/demodriver/internal/httpdriver"
+	"go.autokitteh.dev/demodriver/internal/driverapi"
+	"go.autokitteh.dev/demodriver/internal/driverdashboard"
+	"go.autokitteh.dev/demodriver/internal/drivers/httpdriver"
+	"go.autokitteh.dev/demodriver/internal/drivers/slackdriver"
 	"go.autokitteh.dev/demodriver/internal/httpsvc"
 	"go.autokitteh.dev/demodriver/internal/temporal"
 )
@@ -19,10 +23,14 @@ func New(l *slog.Logger, name string) *fx.App {
 		l,
 		name,
 
+		db.New(),
 		httpsvc.New(),
 		temporal.New(),
 		driver.New(),
+		driverapi.New(),
+		driverdashboard.New(),
 		httpdriver.New(),
+		slackdriver.New(),
 
 		fx.Invoke(func(mux *http.ServeMux) {
 			mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {

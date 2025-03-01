@@ -19,7 +19,9 @@ type config struct {
 func New() fx.Option {
 	return app.Module[config](
 		"temporal",
-		fx.Decorate(func(cfg *config) *config {
+		fx.Decorate(func(in *config) *config {
+			cfg := *in
+
 			if cfg.HostPort == "" {
 				cfg.HostPort = "localhost:7233"
 			}
@@ -28,7 +30,7 @@ func New() fx.Option {
 				cfg.Namespace = "default"
 			}
 
-			return cfg
+			return &cfg
 		}),
 		fx.Provide(func(lc fx.Lifecycle, cfg *config, l *slog.Logger) (client.Client, error) {
 			cl, err := client.NewLazyClient(client.Options{
@@ -51,7 +53,7 @@ func New() fx.Option {
 
 					return nil
 				},
-				OnStop: func(ctx context.Context) error {
+				OnStop: func(context.Context) error {
 					cl.Close()
 					return nil
 				},
