@@ -23,7 +23,7 @@ func New() fx.Option {
 			cfg := *in
 
 			if cfg.DSN == "" {
-				cfg.DSN = ":memory:"
+				cfg.DSN = "dd.sqlite"
 			}
 
 			return &cfg
