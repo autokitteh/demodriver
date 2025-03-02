@@ -15,6 +15,19 @@ Default port is 9001.
 DD_DRIVER_TRIGGERSPATH="examples/triggers.yaml"
 ```
 
+```
+-- triggers.yaml --
+http:
+  src: http
+  qname: q
+  wtype: w4
+
+slack:
+  src: slack
+  qname: q
+  wtype: w4
+```
+
 ### Slack source
 
 ```
