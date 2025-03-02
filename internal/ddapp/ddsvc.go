@@ -12,9 +12,9 @@ import (
 	"go.autokitteh.dev/demodriver/internal/driver"
 	"go.autokitteh.dev/demodriver/internal/driverapi"
 	"go.autokitteh.dev/demodriver/internal/driverdashboard"
-	"go.autokitteh.dev/demodriver/internal/drivers/httpdriver"
-	"go.autokitteh.dev/demodriver/internal/drivers/slackdriver"
 	"go.autokitteh.dev/demodriver/internal/httpsvc"
+	"go.autokitteh.dev/demodriver/internal/sources/httpsource"
+	"go.autokitteh.dev/demodriver/internal/sources/slacksource"
 	"go.autokitteh.dev/demodriver/internal/temporal"
 )
 
@@ -29,8 +29,8 @@ func New(l *slog.Logger, name string) *fx.App {
 		driver.New(),
 		driverapi.New(),
 		driverdashboard.New(),
-		httpdriver.New(),
-		slackdriver.New(),
+		httpsource.New(),
+		slacksource.New(),
 
 		fx.Invoke(func(mux *http.ServeMux) {
 			mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {

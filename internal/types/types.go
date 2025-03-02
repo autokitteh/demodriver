@@ -6,11 +6,11 @@ type (
 )
 
 type Trigger struct {
-	Name         TriggerName `json:"name"`
-	Src          string      `json:"src"`
-	Filter       string      `json:"filter"`
-	QueueName    string      `json:"qname"`
-	WorkflowType string      `json:"wtype"`
+	Name         TriggerName `json:"name" yaml:"name"`
+	Src          string      `json:"src" yaml:"src"`
+	Filter       string      `json:"filter" yaml:"filter"`
+	QueueName    string      `json:"qname" yaml:"qname"`
+	WorkflowType string      `json:"wtype" yaml:"wtype"`
 }
 
 type Workflow struct {

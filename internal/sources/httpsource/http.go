@@ -1,4 +1,4 @@
-package httpdriver
+package httpsource
 
 import (
 	"fmt"
@@ -12,22 +12,22 @@ import (
 	"go.autokitteh.dev/demodriver/internal/driver"
 )
 
-type httpDriver struct {
+type httpSource struct {
 	l     *slog.Logger
 	drive driver.DriveFunc
 }
 
 func New() fx.Option {
 	return app.Module[struct{}](
-		"httpdriver",
+		"httpsource",
 		fx.Invoke(func(l *slog.Logger, mux *http.ServeMux, drive driver.DriveFunc) {
-			d := &httpDriver{l: l, drive: drive}
-			mux.Handle("/drivers/http/", d)
+			d := &httpSource{l: l, drive: drive}
+			mux.Handle("/sources/http/", d)
 		}),
 	)
 }
 
-func (d *httpDriver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (d *httpSource) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		d.l.Error("error reading request body", "err", err)

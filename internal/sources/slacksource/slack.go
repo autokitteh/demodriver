@@ -1,4 +1,4 @@
-package slackdriver
+package slacksource
 
 import (
 	"context"
@@ -19,7 +19,7 @@ type config struct {
 	Debug    bool   `koanf:"debug"`
 }
 
-type slackDriver struct {
+type slackSource struct {
 	cfg           *config
 	l             *slog.Logger
 	driveCallback driver.DriveFunc
@@ -32,7 +32,7 @@ func (l logger) Output(_ int, msg string) error { l.Info(msg); return nil }
 
 func New() fx.Option {
 	return app.Module[config](
-		"slackdriver",
+		"slacksource",
 		fx.Invoke(func(lc fx.Lifecycle, l *slog.Logger, cfg *config, drive driver.DriveFunc) {
 			if cfg.BotToken == "" && cfg.AppToken == "" {
 				l.Warn("no slack bot token or app token supplied, not connecting to slack")
@@ -63,16 +63,16 @@ func New() fx.Option {
 							socketmode.OptionLog(logger{l}),
 						)
 
-						driver := &slackDriver{
+						source := &slackSource{
 							cfg:           cfg,
 							l:             l,
 							driveCallback: drive,
 							client:        client,
 						}
 
-						go driver.run()
+						go source.run()
 
-						go driver.serve()
+						go source.serve()
 
 						return nil
 					},
@@ -82,26 +82,26 @@ func New() fx.Option {
 	)
 }
 
-func (d *slackDriver) run() {
+func (d *slackSource) run() {
 	if err := d.client.Run(); err != nil {
 		d.l.Error("slack run error", "err", err)
 	}
 }
 
-func (d *slackDriver) serve() {
+func (d *slackSource) serve() {
 	for evt := range d.client.Events {
 		d.processEvent(evt)
 	}
 }
 
-func (d *slackDriver) drive(kind socketmode.EventType, data any) {
+func (d *slackSource) drive(kind socketmode.EventType, data any) {
 	_ = d.driveCallback(context.Background(), "slack", map[string]any{
 		"type": kind,
 		"data": data,
 	})
 }
 
-func (d *slackDriver) processEvent(evt socketmode.Event) {
+func (d *slackSource) processEvent(evt socketmode.Event) {
 	l, client := d.l, d.client
 
 	switch evt.Type {

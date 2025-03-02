@@ -63,7 +63,9 @@ func readTriggers(path string) (map[types.TriggerName]*trigger, error) {
 
 	var tts map[types.TriggerName]types.Trigger
 
-	err = yaml.Unmarshal(bs, &tts)
+	if err := yaml.Unmarshal(bs, &tts); err != nil {
+		return nil, fmt.Errorf("parse: %w", err)
+	}
 
 	ts := make(map[types.TriggerName]*trigger, len(tts))
 

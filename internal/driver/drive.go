@@ -74,8 +74,10 @@ func (d *driver) startWorkflow(ctx context.Context, t types.Trigger, data any) (
 			},
 		},
 		t.WorkflowType,
-		t.Name,
-		data,
+		map[string]any{
+			"trigger": t.Name,
+			"data":    data,
+		},
 	)
 }
 
