@@ -17,7 +17,7 @@ func New() fx.Option {
 		fx.Invoke(func(d driver.Driver, mux *http.ServeMux) {
 			api := &api{driver: d}
 
-			mux.HandleFunc("POST /driver/api/signals", api.createSignal)
+			mux.HandleFunc("POST /api/signals", api.createSignal)
 		}),
 	)
 }

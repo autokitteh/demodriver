@@ -1,4 +1,9 @@
 http:
   src: http
   qname: q
-  wtype: w0
+  wtype: w4
+
+slack:
+  src: slack
+  qname: q
+  wtype: w4

@@ -14,8 +14,8 @@ import (
 )
 
 type config struct {
-	BotToken string `koanf:"bot_token"`
-	AppToken string `koanf:"app_token"`
+	BotToken string `koanf:"bottoken"`
+	AppToken string `koanf:"apptoken"`
 	Debug    bool   `koanf:"debug"`
 }
 
@@ -70,9 +70,15 @@ func New() fx.Option {
 							client:        client,
 						}
 
-						go source.run()
+						h := socketmode.NewSocketmodeHandler(client)
+						h.HandleDefault(source.handleEvent)
 
-						go source.serve()
+						go func() {
+							if err := h.RunEventLoop(); err != nil {
+								l.Error("slack event loop error", "err", err)
+								return
+							}
+						}()
 
 						return nil
 					},
@@ -82,18 +88,6 @@ func New() fx.Option {
 	)
 }
 
-func (d *slackSource) run() {
-	if err := d.client.Run(); err != nil {
-		d.l.Error("slack run error", "err", err)
-	}
-}
-
-func (d *slackSource) serve() {
-	for evt := range d.client.Events {
-		d.processEvent(evt)
-	}
-}
-
 func (d *slackSource) drive(kind socketmode.EventType, data any) {
 	_ = d.driveCallback(context.Background(), "slack", map[string]any{
 		"type": kind,
@@ -101,16 +95,22 @@ func (d *slackSource) drive(kind socketmode.EventType, data any) {
 	})
 }
 
-func (d *slackSource) processEvent(evt socketmode.Event) {
-	l, client := d.l, d.client
+func (d *slackSource) handleEvent(evt *socketmode.Event, client *socketmode.Client) {
+	l := d.l
 
 	switch evt.Type {
+	case socketmode.EventTypeHello:
+		l.Info("hello received from slack")
+
 	case socketmode.EventTypeConnecting:
 		l.Info("connecting to slack with socket mode...")
+
 	case socketmode.EventTypeConnectionError:
 		l.Info("connection failed. retrying later...")
+
 	case socketmode.EventTypeConnected:
 		l.Info("connected to slack with socket mode.")
+
 	case socketmode.EventTypeEventsAPI:
 		apiEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 		if !ok {
@@ -123,10 +123,11 @@ func (d *slackSource) processEvent(evt socketmode.Event) {
 			l.Info("slack callback event received", "event", apiEvent)
 			d.drive(evt.Type, apiEvent.InnerEvent)
 		default:
-			l.Debug("unsupported Events API event received")
+			l.Warn("unsupported Events API event received")
 		}
 
 		client.Ack(*evt.Request)
+
 	case socketmode.EventTypeInteractive:
 		callback, ok := evt.Data.(slack.InteractionCallback)
 		if !ok {
@@ -139,6 +140,7 @@ func (d *slackSource) processEvent(evt socketmode.Event) {
 		d.drive(evt.Type, callback)
 
 		client.Ack(*evt.Request)
+
 	case socketmode.EventTypeSlashCommand:
 		cmd, ok := evt.Data.(slack.SlashCommand)
 		if !ok {
@@ -151,6 +153,7 @@ func (d *slackSource) processEvent(evt socketmode.Event) {
 		d.drive(evt.Type, cmd)
 
 		client.Ack(*evt.Request)
+
 	default:
 		l.Error("unexpected event type received", "type", evt.Type)
 	}
